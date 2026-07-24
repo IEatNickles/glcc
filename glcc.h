@@ -298,7 +298,7 @@ const char *egl_error_string(int err) {
   return "UNDEFINED_ERROR";
 }
 
-#define EGL_NONE 0
+#define EGL_NONE 0x3038
 
 #define EGL_EXTENSIONS                    0x3055
 const char *(*eglQueryString)(EGLDisplay, int);
@@ -308,7 +308,6 @@ glcc_Context _glcc_create_context_x11(void *window) {
     printf("EGL error: EGL has not been initialized\n");
     return NULL;
   }
-  printf("%s\n", eglQueryString(_glcc.egl.display, EGL_EXTENSIONS));
 
   _glcc_Context *ctx = calloc(1, sizeof(_glcc_Context));
   if (!eglBindAPI(EGL_OPENGL_API)) {
@@ -345,7 +344,7 @@ glcc_Context _glcc_create_context_x11(void *window) {
   EGLConfig configs[64];
   int num_configs;
   if (!eglChooseConfig(_glcc.egl.display, config_attribs, configs, 64, &num_configs) || num_configs < 1) {
-    printf("EGL error: %s", egl_error_string(eglGetError()));
+    printf("EGL error: no configs available %s\n", egl_error_string(eglGetError()));
     return NULL;
   }
 
@@ -358,6 +357,7 @@ glcc_Context _glcc_create_context_x11(void *window) {
     if (ctx->egl.surface != NULL) break;
   }
   if (ctx->egl.surface == NULL) {
+    printf("EGL error: failed to create surface %s\n", egl_error_string(eglGetError()));
     return NULL;
   }
 
