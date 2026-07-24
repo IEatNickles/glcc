@@ -300,9 +300,6 @@ const char *egl_error_string(int err) {
 
 #define EGL_NONE 0x3038
 
-#define EGL_EXTENSIONS                    0x3055
-const char *(*eglQueryString)(EGLDisplay, int);
-
 glcc_Context _glcc_create_context_x11(void *window) {
   if (_glcc.egl.display == 0) {
     printf("EGL error: EGL has not been initialized\n");
@@ -434,7 +431,6 @@ glcc_bool _glcc_init_egl() {
   if (!_glcc.egl.ChooseConfig) return GLCC_FALSE;
   _glcc.egl.GetError = _glcc_get_symbol(_glcc.egl.handle, "eglGetError");
   if (!_glcc.egl.GetError) return GLCC_FALSE;
-  eglQueryString = _glcc_get_symbol(_glcc.egl.handle, "eglQueryString");
 
   return GLCC_TRUE;
 }
