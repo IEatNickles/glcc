@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 typedef void* glcc_Lib;
-typedef uint8_t glcc_bool;
+typedef uint32_t glcc_bool;
 #define GLCC_TRUE 1
 #define GLCC_FALSE 0
 

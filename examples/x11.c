@@ -15,13 +15,14 @@
 void(*glGetIntegerv)(unsigned int, int*);
 void(*glClear)(unsigned int);
 void(*glClearColor)(float, float, float, float);
+void(*glViewport)(int, int, int, int);
 
 int main() {
   Display *dpy = XOpenDisplay(NULL);
   Window root_window = XDefaultRootWindow(dpy);
 
   XSetWindowAttributes window_attribs = {};
-  window_attribs.event_mask = KeyPressMask | KeyReleaseMask;
+  window_attribs.event_mask = KeyPressMask | KeyReleaseMask | StructureNotifyMask;
   Window window = XCreateWindow(dpy, root_window,
       0, 0, 800, 600,
       0, CopyFromParent, CopyFromParent, CopyFromParent,
@@ -40,6 +41,7 @@ int main() {
   glGetIntegerv = glcc_get_proc_address("glGetIntegerv");
   glClearColor = glcc_get_proc_address("glClearColor");
   glClear = glcc_get_proc_address("glClear");
+  glViewport = glcc_get_proc_address("glViewport");
   int major, minor;
   glGetIntegerv(GL_MAJOR_VERSION, &major);
   glGetIntegerv(GL_MINOR_VERSION, &minor);
@@ -49,19 +51,28 @@ int main() {
   int running = 1;
   while (running) {
     XEvent e = {};
-    XNextEvent(dpy, &e);
-    switch (e.type) {
-      case KeyPress:
-        if (e.xkey.keycode == XKeysymToKeycode(dpy, XK_Escape)) {
-          running = 0;
-        }
-        break;
-      case KeyRelease:
-        break;
-      case ClientMessage:
-        if (e.xclient.data.l[0] == wm_delete_message) running = 0;
-        break;
+    XPending(dpy);
+    while (QLength(dpy)) {
+      XNextEvent(dpy, &e);
+      switch (e.type) {
+        case ConfigureNotify:
+          int w = e.xconfigure.width;
+          int h = e.xconfigure.height;
+          glViewport(0, 0, w, h);
+          break;
+        case KeyPress:
+          if (e.xkey.keycode == XKeysymToKeycode(dpy, XK_Escape)) {
+            running = 0;
+          }
+          break;
+        case KeyRelease:
+          break;
+        case ClientMessage:
+          if (e.xclient.data.l[0] == wm_delete_message) running = 0;
+          break;
+      }
     }
+    XFlush(dpy);
 
     glClear(GL_COLOR_BUFFER_BIT);
 
