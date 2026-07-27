@@ -37,6 +37,7 @@ int main() {
   glcc_Context ctx = glcc_create_context((void*)window);
   assert(ctx && "failed to create context");
   glcc_make_current(ctx);
+  glcc_swap_interval(1);
   printf("%p\n", ctx);
   glGetIntegerv = glcc_get_proc_address("glGetIntegerv");
   glClearColor = glcc_get_proc_address("glClearColor");
